@@ -11,17 +11,17 @@ data class SelfCheckAdapter(
   // sn
   var sn: Int = 0,
   // rtc 晶振状态
-  var rtcStatus: Status = Status.NORMAL,
+  var rtcStatus: Status = Status.ABNORMAL,
   // ad 模块状态
-  var adStatus: Status = Status.NORMAL,
+  var adStatus: Status = Status.ABNORMAL,
   // mems 模块状态
-  var memsStatus: Status = Status.NORMAL,
+  var memsStatus: Status = Status.ABNORMAL,
   // 外部 flash 状态
-  var flashStatus: Status = Status.NORMAL,
+  var flashStatus: Status = Status.ABNORMAL,
   // 温度模块状态
-  var tempStatus: Status = Status.NORMAL,
+  var tempStatus: Status = Status.ABNORMAL,
   // Lora 模块状态
-  var loraStatus: Status = Status.NORMAL,
+  var loraStatus: Status = Status.ABNORMAL,
   // Lora 信号
   var loraSignal: Byte = 0,
   // 蓝牙信号
@@ -45,15 +45,15 @@ data class SelfCheckAdapter(
     }
   }
 
-  val Byte.status: Status
+  private val Byte.status: Status
     get() = Status.of(this)
 
   enum class Status(val status: Byte) {
-    NORMAL(0x00) {
+    NORMAL(0x01) {
       override val display: String
         get() = "正常"
     },
-    ABNORMAL(0x01) {
+    ABNORMAL(0x00) {
       override val display: String
         get() = "异常"
     },
@@ -62,7 +62,7 @@ data class SelfCheckAdapter(
 
     companion object {
       fun of(status: Byte): Status {
-        return values().find { it.status == status } ?: NORMAL
+        return values().find { it.status == status } ?: ABNORMAL
       }
     }
   }
