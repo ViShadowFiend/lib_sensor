@@ -82,7 +82,14 @@ abstract class ABleMgr {
     }
   }
 
-  fun scan(scanCallback: ScanCallback) {
+  fun scan(
+    scanCallback: ScanCallback,
+    buildScanRule: (BleScanRuleConfig.Builder.() -> Unit)? = null
+  ) {
+    if (buildScanRule != null) {
+      BleManager.getInstance()
+        .initScanRule(BleScanRuleConfig.Builder().apply(buildScanRule).build())
+    }
     curFuture?.cancel(true)
     mainHandler.removeCallbacksAndMessages(null)
     curFuture = singleExecutor.submit {
@@ -93,6 +100,8 @@ abstract class ABleMgr {
       BleManager.getInstance().scan(object : BleScanCallback() {
         override fun onScanFinished(scanResultList: MutableList<BleDevice>?) {
           isScanning = false
+          bleDevices.clear()
+          bleDevices.addAll(scanResultList ?: emptyList())
           mainHandler.post { scanCallback.onScanEnd() }
         }
 
@@ -105,15 +114,10 @@ abstract class ABleMgr {
         }
 
         override fun onScanning(bleDevice: BleDevice?) {
-          if (
-            // bleDevice?.name?.startsWith("RH205_", true) == true
-            bleDevice?.name != null
-          ) {
-            if (bleDevices.none { it.mac == bleDevice.mac }){
-              bleDevices.add(bleDevice)
-              mainHandler.post { scanCallback.onScanResult(bleDevices) }
-            }
+          if (bleDevice?.name != null && bleDevices.none { it.mac == bleDevice.mac }) {
+            bleDevices.add(bleDevice)
           }
+          mainHandler.post { scanCallback.onScanResult(bleDevices) }
         }
       })
     }
