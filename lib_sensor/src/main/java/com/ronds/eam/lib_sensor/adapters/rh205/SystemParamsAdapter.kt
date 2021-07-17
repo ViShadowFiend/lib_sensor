@@ -12,6 +12,7 @@ import com.ronds.eam.lib_sensor.utils.getInt
 import com.ronds.eam.lib_sensor.utils.getShort
 import com.ronds.eam.lib_sensor.utils.getString
 
+// kotlin 1.5.0 之后 Unsigned 类型 release, 之后可以考虑替换为 Unsigned 类型.
 data class SystemParamsAdapter(
   var channel: Byte = 0,
   var originLoraRxFreq: Float = 0F,
@@ -19,7 +20,7 @@ data class SystemParamsAdapter(
   var loraTxPow: Byte = 0,
   var bleName: String = "",
   var sn: Int = 0,
-  var mcVersion: Short = 0,
+  var mcVersion: String = "",
   var adVersion: Byte = 0,
   var sVersionMain: Short = 0,
   var sVersionSub: Byte = 0,
@@ -47,7 +48,7 @@ data class SystemParamsAdapter(
       4 to loraRxFreq,
       4 to loraTxFreq,
       1 to loraTxPow,
-      10 to bleName,
+      20 to bleName,
       4 to sn,
       2 to mcVersion,
       1 to adVersion,
@@ -59,13 +60,13 @@ data class SystemParamsAdapter(
       4 to accCoeY,
       16 to ByteArray(16),
     )
-      .let { Utils.buildBytes(60, it) }
+      .let { Utils.buildBytes(70, it) }
       .run { pack() }
   }
 
   override fun decode(bytes: ByteArray?): SystemParamsAdapter {
     val unpack = try {
-      bytes.unpack(65)
+      bytes.unpack(75)
     } catch (e: Exception) {
       throw RException("unpack失败. len = ${bytes?.size}.", e)
     }
@@ -80,15 +81,15 @@ data class SystemParamsAdapter(
         originLoraTxFreq = decodeLoraTxFreq(loraTxFreq, channel)
         checkLoraTxFreq(originLoraTxFreq)
         loraTxPow = unpack.getByte(9)
-        bleName = unpack.getString(10, 10)
-        sn = unpack.getInt(20)
-        mcVersion = unpack.getShort(24)
-        adVersion = unpack.getByte(26)
-        sVersionMain = unpack.getShort(27)
-        sVersionSub = unpack.getByte(29)
-        accCoe = unpack.getFloat(32)
-        accCoeX = unpack.getFloat(36)
-        accCoeY = unpack.getFloat(40)
+        bleName = unpack.getString(10, 20)
+        sn = unpack.getInt(30)
+        mcVersion = unpack.getString(34, 2)
+        adVersion = unpack.getByte(36)
+        sVersionMain = unpack.getShort(37)
+        sVersionSub = unpack.getByte(39)
+        accCoe = unpack.getFloat(42)
+        accCoeX = unpack.getFloat(46)
+        accCoeY = unpack.getFloat(50)
       } catch (e: Exception) {
         throw RException("解析错误. ${ByteUtil.parseByte2HexStr(bytes)}", e)
       }
@@ -96,7 +97,7 @@ data class SystemParamsAdapter(
   }
 
   private fun checkChannel(channel: Byte): Boolean {
-    return channel in 1..64
+    return channel in 1..255
   }
 
   private fun checkLoraTxFreq(freq: Float): Boolean {

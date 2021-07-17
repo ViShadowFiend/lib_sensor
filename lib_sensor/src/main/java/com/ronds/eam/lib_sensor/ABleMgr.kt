@@ -285,11 +285,11 @@ abstract class ABleMgr {
     bleWriteCallback: BleWriteCallback?
   ) {
     if (bleDevice == null || uuid_service == null || uuid_write == null || write_data == null) return
-    onLog?.invoke("WRITE ${ByteUtil.byteArray2HexString(write_data)}")
+    onLog?.invoke("WRITE ${ByteUtil.byteArray2HexStringWithIndex(write_data)}")
     BleManager.getInstance().write(bleDevice, uuid_service, uuid_write, write_data, false,
       object : BleWriteCallback() {
         override fun onWriteSuccess(current: Int, total: Int, justWrite: ByteArray?) {
-          onLog?.invoke("WRITE 成功 ${ByteUtil.byteArray2HexString(write_data)}")
+          onLog?.invoke("WRITE 成功 ${ByteUtil.byteArray2HexStringWithIndex(write_data)}")
           bleWriteCallback?.onWriteSuccess(current, total, justWrite)
         }
 
@@ -313,7 +313,7 @@ abstract class ABleMgr {
     if (bleDevice == null) return
     BleManager.getInstance().read(bleDevice, uuid_service, uuid_read, object : BleReadCallback() {
       override fun onReadSuccess(data: ByteArray?) {
-        onLog?.invoke("READ 成功 ${ByteUtil.byteArray2HexString(data)}")
+        onLog?.invoke("READ 成功 ${ByteUtil.byteArray2HexStringWithIndex(data)}")
         bleReadCallback?.onReadSuccess(data)
       }
 
@@ -333,7 +333,7 @@ abstract class ABleMgr {
     BleManager.getInstance().notify(
       curBleDevice, UUID_SERVICE, UUID_UP, object : BleNotifyCallback() {
       override fun onCharacteristicChanged(data: ByteArray?) {
-        onLog?.invoke("Notify 收到 ${ByteUtil.byteArray2HexString(data)}")
+        onLog?.invoke("Notify 收到 ${ByteUtil.byteArray2HexStringWithIndex(data)}")
         onReceived(data)
       }
 

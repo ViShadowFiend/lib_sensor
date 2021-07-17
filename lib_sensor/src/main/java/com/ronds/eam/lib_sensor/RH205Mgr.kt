@@ -35,7 +35,7 @@ import com.ronds.eam.lib_sensor.utils.CRC
 import com.ronds.eam.lib_sensor.utils.getInt
 import com.ronds.eam.lib_sensor.utils.getShort
 import com.ronds.eam.lib_sensor.utils.pack
-import com.ronds.eam.lib_sensor.utils.toHex
+import com.ronds.eam.lib_sensor.utils.toHexString
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Arrays
@@ -130,7 +130,7 @@ object RH205Mgr : ABleMgr() {
       doSleep(200)
       notify { data ->
         dTag("notify_temp", ByteUtil.parseByte2HexStr(data))
-        dTag("notify_temp1", data?.toHex())
+        dTag("notify_temp1", data?.toHexString())
         isReceivedTemp.set(true)
         if (!isTempProcessing.get()) return@notify
         if (isTimeoutTemp.get()) return@notify

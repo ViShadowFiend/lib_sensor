@@ -206,6 +206,30 @@ public class ByteUtil {
         .toString();
   }
 
+  public static String byteArray2HexStringWithIndex(byte[] bytes) {
+    if (bytes == null || bytes.length == 0) {
+      return "[]";
+    }
+    StringBuilder sb = new StringBuilder();
+    String temp;
+    for (int i = 0; i < bytes.length; i ++) {
+      byte b = bytes[i];
+      temp = Integer.toHexString(0xFF & b);
+      sb.append(i).append(" - ");
+      if (temp.length() < 2) {
+        sb.append("0x0");
+      }
+      else {
+        sb.append("0x");
+      }
+      sb.append(temp.toUpperCase()).append(", ");
+    }
+    return sb.delete(sb.length() - 2, sb.length())
+        .insert(0, "[")
+        .append("]")
+        .toString();
+  }
+
   /**
    * 二进制字符串转byte
    */
