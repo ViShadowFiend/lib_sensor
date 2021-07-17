@@ -7,8 +7,8 @@ android {
   defaultConfig {
     minSdkVersion 21
     targetSdkVersion 30
-    versionCode 8
-    versionName "1.0.8"
+    versionCode 10
+    versionName "1.1.0"
 
     ndk {
       abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a'
@@ -54,7 +54,7 @@ buildscript {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.31"
-  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
-  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
 }
