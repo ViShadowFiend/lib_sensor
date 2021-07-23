@@ -38,7 +38,7 @@ public class VibDataProcessUtil {
    *
    * @param spectrum 转频谱媒介
    * @param data 原始加速度/速度/位移波形数据
-   * @param f 分析频率
+   * @param f 采样频率, Hz
    */
   public static native void fft(Spectrum spectrum, double[] data, double f);
 }

@@ -32,6 +32,7 @@ import com.ronds.eam.lib_sensor.consts.UUID_SERVICE
 import com.ronds.eam.lib_sensor.consts.UUID_UP
 import com.ronds.eam.lib_sensor.utils.ByteUtil
 import com.ronds.eam.lib_sensor.utils.CRC
+import com.ronds.eam.lib_sensor.utils.L
 import com.ronds.eam.lib_sensor.utils.getInt
 import com.ronds.eam.lib_sensor.utils.getShort
 import com.ronds.eam.lib_sensor.utils.pack
@@ -166,6 +167,10 @@ object RH205Mgr : ABleMgr() {
     onTimeListener: ((time: Long, speed: Float) -> Unit)? = null,
     callback: SampleResultCallback
   ) {
+    L.setGlobalTag("测试测振传输")
+    val initT = System.currentTimeMillis()
+    var t = initT
+    L.d("测振开始")
     if (!isConnected()) {
       callback.onFail(TIP_DISCONNECT)
       return
@@ -206,7 +211,7 @@ object RH205Mgr : ABleMgr() {
 
     var testTime: Long = System.currentTimeMillis()
     var testIndex: Int = 0
-    var testTotalBagCount: Int = (dataLength.toFloat() / CHUNK_LEN).toInt()
+    val testTotalBagCount: Int = (dataLength.toFloat() / CHUNK_LEN).toInt()
 
     // 用以计算传输耗时和传输速率
     var firstChunk = true
@@ -225,6 +230,9 @@ object RH205Mgr : ABleMgr() {
           )
           when (data[1]) {
             CMD_SAMPLING_PARAMS -> { // 收到下达测振的回复
+              val _t_ = System.currentTimeMillis()
+              L.d("收到测振下达命令的结果 ${_t_ - t}ms ${_t_ - initT}ms\n${data.toHexString()}")
+              t = _t_
               dTag("notify_sample", data)
               isReceivedSample.set(true)
               if (isTimeoutSample.get()) {
@@ -265,10 +273,6 @@ object RH205Mgr : ABleMgr() {
             }
             CMD_DATA_DETAIL -> { // 收到测振数据
               isReceivedWaveData.set(true)
-              Log.d(
-                "收到包号",
-                "${testIndex++}/${testTotalBagCount}, ${System.currentTimeMillis() - testTime}"
-              )
               if (firstChunk) {
                 firstChunk = false
                 firstChunkMills = System.currentTimeMillis()
@@ -278,6 +282,9 @@ object RH205Mgr : ABleMgr() {
                 return
               }
               val curBagNum: Int = data.getShort(4).toInt()
+              val _t_ = System.currentTimeMillis()
+              L.d("收到包${curBagNum} ${testIndex++}/${testTotalBagCount}. ${_t_ - t}ms ${_t_ - initT}ms")
+              t = _t_
               val bytes = Arrays.copyOfRange(data, 6, data.size - 1)
               waveData[curBagNum] = bytes
             }
@@ -285,6 +292,9 @@ object RH205Mgr : ABleMgr() {
               if (data.size != 9) {
                 return
               }
+              var _t_ = System.currentTimeMillis()
+              L.d("收到结果确认. ${_t_ - t}ms ${_t_ - initT}ms}")
+              t = _t_
               isReceivedResultFirst.set(true)
               if (isTimeoutResultFirst.get()) {
                 return
@@ -302,8 +312,13 @@ object RH205Mgr : ABleMgr() {
                   isEnd = false
                 }
               }
+
               val log = ByteUtil.bytes2BitStr(response).substring(0, totalBagCount)
               onLog?.invoke("response: $log")
+              _t_ = System.currentTimeMillis()
+              L.d("收包状态 ${log}. ${_t_ - t}ms ${_t_ - initT}ms}")
+              t = _t_
+
               if (isEnd) {
                 val bytes: MutableList<Byte> = mutableListOf()
                 for (i in 0 until totalBagCount) {
@@ -323,10 +338,16 @@ object RH205Mgr : ABleMgr() {
                 val res = response.pack(HEAD_TO_SENSOR, CMD_WAVE_DATA_RESULT)
                 doSleep(50)
                 write(res)
+                _t_ = System.currentTimeMillis()
+                L.d("结束, 总包数=${totalBagCount}, len=${testLen}byte->${testLenClip}byte, 平均速率=${speed}KB/s, 传输耗时=${_t_ - firstChunkMills}ms, 总耗时=${_t_ - initT}ms. ${_t_ - t}ms ${_t_ - initT}ms}")
+                t = _t_
                 mainHandler.post {
                   release()
                 }
               } else {
+                _t_ = System.currentTimeMillis()
+                L.d("重试. ${_t_ - t}ms ${_t_ - initT}ms}")
+                t = _t_
                 doRetry(50L, {
                   val res = response.pack(HEAD_TO_SENSOR, CMD_WAVE_DATA_RESULT)
                   write(res)

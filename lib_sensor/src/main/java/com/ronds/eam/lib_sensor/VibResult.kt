@@ -95,12 +95,14 @@ class VibResult private constructor(private val builder: Builder) {
     val spectrum = Spectrum()
     VibDataProcessUtil.fft(spectrum, this, freq.toDouble())
     var r = spectrum.amplitude
-    // val df = freqUpper * 1.28 / (size - 1)
-    // val range = freqUpper / df
+    // val dx = builder.freqSample / builder.len.toDouble()
+    // val range = builder.freqAnalysis / dx
+    // val range = builder.freqAnalysis * builder.len.toDouble() / builder.freqSample
+    val range = builder.len.toDouble() / builder.freqCoe
 
     // kotlin 的这个 copyOfRange 不会取两个 arr 的最小 len, 会直接 IndexOutOfBoundsException
-    // r = r.copyOfRange(0, ((size - 1) / 1.28).toInt())
-    r = Arrays.copyOfRange(r, 0, ((size - 1) / 1.28).toInt())
+    // r = r.copyOfRange(0, range.toInt())
+    r = Arrays.copyOfRange(r, 0, range.toInt())
     return r
   }
 
@@ -173,7 +175,7 @@ class VibResult private constructor(private val builder: Builder) {
         return if (size <= 1) {
           1.0
         } else {
-          builder.freqSample / 2 / (data().size - 1).toDouble()
+          builder.freqSample / builder.len.toDouble()
         }
       }
       else -> 1000.0 / builder.freqSample
