@@ -97,7 +97,7 @@ data class SystemParamsAdapter(
   }
 
   private fun checkChannel(channel: Byte): Boolean {
-    return channel in 1..255
+    return channel.toUByte() in 1U..255U
   }
 
   private fun checkLoraTxFreq(freq: Float): Boolean {
@@ -108,7 +108,7 @@ data class SystemParamsAdapter(
         )
       )
     // if (!r) {
-    //   throw IllegalArgumentException("LoraRxFreq $freq illegal.")
+    //   throw IllegalArgumentException("LoraTxFreq $freq illegal.")
     // }
     return r
   }
@@ -116,7 +116,7 @@ data class SystemParamsAdapter(
   private fun checkLoraRxFreq(freq: Float): Boolean {
     val r = freq.toString().matches(Regex("5(10\\.5|0[0-9]\\.[05])"))
     // if (!r) {
-    //   throw IllegalArgumentException("LoraTxFreq $freq illegal.")
+    //   throw IllegalArgumentException("LoraRxFreq $freq illegal.")
     // }
     return r
   }
@@ -132,13 +132,13 @@ data class SystemParamsAdapter(
   }
 
   private fun encodeLoraTxFreq(freq: Float, channel: Byte): Int {
-    val a: Int = (channel - 1) % 8
+    val a: Int = (channel.toUByte().toInt() - 1) % 8
     val r = (freq + a * 0.2f) * 100_0000
     return r.toInt()
   }
 
   private fun decodeLoraTxFreq(freq: Int, channel: Byte): Float {
-    val a: Int = (channel - 1) % 8
+    val a: Int = (channel.toUByte().toInt() - 1) % 8
     val r = freq / 100_0000.toFloat() - a * 0.2f
     return r
   }
