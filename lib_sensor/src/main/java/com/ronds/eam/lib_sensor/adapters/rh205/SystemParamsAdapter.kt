@@ -20,7 +20,7 @@ data class SystemParamsAdapter(
   var loraTxPow: Byte = 0,
   var bleName: String = "",
   var sn: Int = 0,
-  var mcVersion: String = "",
+  var mcVersion: Short = 0,
   var adVersion: Byte = 0,
   var sVersionMain: Short = 0,
   var sVersionSub: Byte = 0,
@@ -83,7 +83,7 @@ data class SystemParamsAdapter(
         loraTxPow = unpack.getByte(9)
         bleName = unpack.getString(10, 20)
         sn = unpack.getInt(30)
-        mcVersion = unpack.getString(34, 2)
+        mcVersion = unpack.getShort(34)
         adVersion = unpack.getByte(36)
         sVersionMain = unpack.getShort(37)
         sVersionSub = unpack.getByte(39)
