@@ -96,50 +96,57 @@ data class SystemParamsAdapter(
     }
   }
 
-  private fun checkChannel(channel: Byte): Boolean {
-    return channel.toUByte() in 1U..255U
-  }
+  companion object {
+    private fun checkChannel(channel: Byte): Boolean {
+      return channel.toUByte() in 1U..255U
+    }
 
-  private fun checkLoraTxFreq(freq: Float): Boolean {
-    val r = freq.toString()
-      .matches(
-        Regex(
-          "4(70\\.7|72\\.3|73\\.9|75\\.5|77\\.1|78\\.7|80\\.3|81\\.9|83\\.5|85\\.1|86\\.7|88\\.3)"
+    private fun checkLoraTxFreq(freq: Float): Boolean {
+      val r = freq.toString()
+        .matches(
+          Regex(
+            "4(70\\.7|72\\.3|73\\.9|75\\.5|77\\.1|78\\.7|80\\.3|81\\.9|83\\.5|85\\.1|86\\.7|88\\.3)"
+          )
         )
-      )
-    // if (!r) {
-    //   throw IllegalArgumentException("LoraTxFreq $freq illegal.")
-    // }
-    return r
-  }
+      // if (!r) {
+      //   throw IllegalArgumentException("LoraTxFreq $freq illegal.")
+      // }
+      return r
+    }
 
-  private fun checkLoraRxFreq(freq: Float): Boolean {
-    val r = freq.toString().matches(Regex("5(10\\.5|0[0-9]\\.[05])"))
-    // if (!r) {
-    //   throw IllegalArgumentException("LoraRxFreq $freq illegal.")
-    // }
-    return r
-  }
+    private fun checkLoraRxFreq(freq: Float): Boolean {
+      val r = freq.toString().matches(Regex("5(10\\.5|0[0-9]\\.[05])"))
+      // if (!r) {
+      //   throw IllegalArgumentException("LoraRxFreq $freq illegal.")
+      // }
+      return r
+    }
 
-  private fun encodeLoraRxFreq(freq: Float): Int {
-    val r = freq * 100_0000
-    return r.toInt()
-  }
+    private fun encodeLoraRxFreq(freq: Float): Int {
+      val r = freq * 100_0000
+      return r.toInt()
+    }
 
-  private fun decodeLoraRxFreq(freq: Int): Float {
-    val r = freq / 100_0000f
-    return r
-  }
+    private fun decodeLoraRxFreq(freq: Int): Float {
+      val r = freq / 100_0000f
+      return r
+    }
 
-  private fun encodeLoraTxFreq(freq: Float, channel: Byte): Int {
-    val a: Int = (channel.toUByte().toInt() - 1) % 8
-    val r = (freq + a * 0.2f) * 100_0000
-    return r.toInt()
-  }
+    private fun encodeLoraTxFreq(freq: Float, channel: Byte): Int {
+      val a: Int = (channel.toUByte().toInt() - 1) % 8
+      val r = (freq + a * 0.2f) * 100_0000
+      return r.toInt()
+    }
 
-  private fun decodeLoraTxFreq(freq: Int, channel: Byte): Float {
-    val a: Int = (channel.toUByte().toInt() - 1) % 8
-    val r = freq / 100_0000.toFloat() - a * 0.2f
-    return r
+    private fun decodeLoraTxFreq(freq: Int, channel: Byte): Float {
+      val a: Int = (channel.toUByte().toInt() - 1) % 8
+      val r = freq / 100_0000.toFloat() - a * 0.2f
+      return r
+    }
+
+    // decodeLoraTxFreq 相当于换算出发送基频段, 这个为实际发送频段
+    fun getRealLoraTxFreq(baseTxFreq: Float, channel: Byte): Float {
+      return encodeLoraTxFreq(baseTxFreq, channel) / 100_0000f
+    }
   }
 }
