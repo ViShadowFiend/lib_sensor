@@ -17,7 +17,7 @@ data class SampleParamsAdapter(
   var axis: Byte = 0,
   // 测温发射率
   var tempEmi: Float = 0.97f,
-): Encoder {
+) : Encoder {
 
   override val cmdTo: Byte
     get() = RH205Consts.CMD_SAMPLING_PARAMS
@@ -45,4 +45,21 @@ data class SampleParamsAdapter(
       .let { Utils.buildBytes(9, it) }
       .run { pack() }
   }
+
+  val lenDisplay get() = "${len}K"
+  val freqDisplay get() = "${freq * 100}Hz"
+  val axisDisplay
+    get(): String {
+      val ret = ""
+      if (axis == 0.toByte()) {
+        return "Z"
+      }
+      if (axis == 1.toByte()) {
+        return "X"
+      }
+      if (axis == 2.toByte()) {
+        return "Y"
+      }
+      return ret
+    }
 }
